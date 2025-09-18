@@ -99,7 +99,7 @@
      .drop-area-sm { border: 2px solid var(--border-dark); padding: 1rem; cursor: pointer; border-radius: 0.75rem; transition: all 0.2s ease; }
     .drop-area-sm:hover { border-color: var(--brand-primary); }
     .drop-area-sm.dragover { border-color: var(--brand-primary); background-color: rgba(99, 102, 241, 0.1); }
-    .preview-image-container { position: relative; width: 100%; padding-top: 100%; }
+    .preview-image-container { position: relative; width: 100%; padding-top: 100%; /* 1:1 Aspect Ratio */ }
     .preview-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0.5rem; }
 
     
@@ -115,7 +115,7 @@
     .chat-bubble-ai li { margin-bottom: 0.25rem; }
 
     /* Category Card */
-    .category-card { position: relative; border-radius: 0.75rem; overflow: hidden; aspect-ratio: 4 / 3; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .category-card { position: relative; border-radius: 0.75rem; overflow: hidden; aspect-ratio: 4 / 3; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
     .category-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
     .category-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
     .category-card:hover img { transform: scale(1.05); }
@@ -158,6 +158,24 @@
       color: var(--text-muted);
     }
 
+    /* Fix for Google Maps Autocomplete dropdown */
+    .pac-container {
+        background-color: var(--card-dark);
+        border: 1px solid var(--border-dark);
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 9999 !important;
+    }
+    .pac-item {
+        padding: 0.75rem;
+        cursor: pointer;
+        color: var(--text-light);
+        border-top: 1px solid var(--border-dark);
+    }
+    .pac-item:first-child { border-top: none; }
+    .pac-item:hover { background-color: var(--card-elevated); }
+    .pac-item-query { font-size: 0.875rem; color: var(--text-light); }
+    .pac-matched { color: var(--brand-primary); font-weight: 600; }
   </style>
 </head>
 <body class="antialiased">
@@ -248,7 +266,7 @@
 
     <section id="plots" class="py-16 bg-slate-900/20">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 id="browse-heading" class="text-3xl font-bold text-white mb-8">Featured Listings in Pune</h2>
+        <h2 id="browse-heading" class="text-3xl font-bold text-white mb-8">Featured Listings</h2>
         <div id="category-browser" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"></div>
         <div id="city-filter" class="flex justify-center flex-wrap gap-3 mb-10"></div>
         <div id="plot-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
@@ -344,14 +362,14 @@
                         </div>
                     </div>
                     <div id="otp-step" class="hidden space-y-4">
-                         <div>
+                        <div>
                             <label for="mobile" class="font-semibold text-slate-300">Mobile Number</label>
                             <div class="relative mt-2">
                                 <i class="ph-bold ph-phone form-input-icon"></i>
                                 <input type="tel" id="mobile" placeholder="+91 XXXXX XXXXX" class="form-input pl-12">
                             </div>
                         </div>
-                         <div>
+                        <div>
                             <label for="otp" class="font-semibold text-slate-300">OTP</label>
                             <div class="relative mt-2">
                                 <i class="ph-bold ph-key form-input-icon"></i>
@@ -372,7 +390,7 @@
             </div>
             <div class="hidden md:block md:w-1/2 relative overflow-hidden">
                 <div id="login-visual" class="absolute inset-0">
-                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -564,17 +582,23 @@
         <div class="space-y-5 max-w-lg mx-auto">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
             <div>
+              <label for="location" class="form-label">Location Name</label>
+              <input type="text" id="location" name="location" class="form-input" placeholder="e.g., Hinjawadi" required>
+            </div>
+            <div>
+              <label for="city" class="form-label">City</label>
+              <input type="text" id="city" name="city" class="form-input" placeholder="e.g., Nallasopara" required>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+            <div>
               <label for="property_type" class="form-label">Type of Plot</label>
               <select id="property_type" name="property_type" class="form-input" required><option value="">Select Type</option><option>Residential</option><option>Commercial</option><option>Agricultural</option></select>
             </div>
             <div>
-              <label for="location" class="form-label">Location Name</label>
-              <input type="text" id="location" name="location" class="form-input" placeholder="e.g., Hinjawadi" required>
+              <label for="nearby" class="form-label">Nearby Landmark</label>
+              <input type="text" id="nearby" name="nearby" class="form-input" placeholder="e.g., Near Wipro Circle">
             </div>
-          </div>
-          <div>
-            <label for="nearby" class="form-label">Nearby Landmark</label>
-            <input type="text" id="nearby" name="nearby" class="form-input" placeholder="e.g., Near Wipro Circle">
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
             <div>
@@ -601,8 +625,9 @@
       <div class="form-step hidden" data-step="2">
         <div class="text-center mb-6">
             <h3 class="text-2xl font-bold text-white">Step 2: Pin Location on Map</h3>
-            <p class="text-slate-400 text-sm">Drag the pin or click on the map to set the exact location.</p>
+            <p class="text-slate-400 text-sm">Search or drag the pin to set the exact location.</p>
         </div>
+        <input type="text" id="location-search-input" class="form-input w-full max-w-lg mx-auto mb-4" placeholder="Search for a location...">
         <div id="map" class="w-full h-80 rounded-lg border border-slate-700 my-6"></div>
         <div class="flex gap-4 max-w-lg mx-auto">
           <button type="button" class="w-full py-3 bg-slate-700 text-white font-semibold rounded-lg hover:bg-slate-600 prev-btn" data-prev="1">← Previous</button>
@@ -715,7 +740,7 @@
             <p class="text-slate-400 mt-2">Here's a side-by-side analysis of the selected properties.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8" id="comparison-columns">
-             </div>
+           </div>
         <div class="bg-card-elevated p-6 rounded-lg border border-border-dark">
             <h3 class="text-xl font-bold text-white flex items-center gap-2"><i class="ph-bold ph-sparkle text-amber-400"></i>AI Recommendation</h3>
             <div class="text-slate-300 mt-2 prose prose-invert max-w-none" id="ai-recommendation"></div>
@@ -733,7 +758,7 @@
             <p class="text-slate-400 mt-2" id="summary-location"></p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center" id="summary-highlights">
-             </div>
+           </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div id="summary-pros">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2 mb-3"><i class="ph-bold ph-check-circle text-green-400"></i>Pros</h3>
@@ -795,19 +820,17 @@
 
     // Mock data as a fallback if the backend is not running
     const mockPlots = [
-        { id: '1', location: 'Hinjawadi Phase 1', city: 'Pune', area_sqft: 2000, price: 9000000, facing: 'East', vastu_score: 85, image_urls: ['https://images.pexels.com/photos/221540/pexels-photo-221540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['Gated Community', '24/7 Security'], latitude: 18.5913, longitude: 73.7423, created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' },
-        { id: '2', location: 'Wakad', city: 'Pune', area_sqft: 1500, price: 7500000, facing: 'North-East', vastu_score: 92, image_urls: ['https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['Park', 'Clubhouse'], latitude: 18.6083, longitude: 73.7634, created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), is_verified: false, listing_type: 'For Sale' },
-        { id: '3', location: 'Kharadi', city: 'Pune', area_sqft: 3000, price: 15000000, facing: 'West', vastu_score: 68, image_urls: ['https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'NA Plot', amenities: ['Water Connection'], latitude: 18.5517, longitude: 73.9362, created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' },
-        { id: '4', location: 'Andheri West', city: 'Mumbai', area_sqft: 1200, price: 50000000, facing: 'East', vastu_score: 88, image_urls: ['https://images.pexels.com/photos/210617/pexels-photo-210617.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['Gated Community'], latitude: 19.1365, longitude: 72.8275, created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), is_verified: false, listing_type: 'For Sale' },
-        { id: '5', location: 'Panvel', city: 'Mumbai', area_sqft: 5000, price: 25000000, facing: 'North', vastu_score: 95, image_urls: ['https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'NA Plot', amenities: ['Road Touch'], latitude: 18.9894, longitude: 73.1175, created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' },
-        { id: '6', location: 'DLF Phase 5', city: 'Delhi NCR', area_sqft: 4500, price: 150000000, facing: 'North-East', vastu_score: 94, image_urls: ['https://images.pexels.com/photos/313960/pexels-photo-313960.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['24/7 Security'], latitude: 28.4595, longitude: 77.0266, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' }
+        { id: '1', location: 'Hinjawadi Phase 1', city: 'Pune', area_sqft: 2000, price: 9000000, facing: 'East', image_urls: ['https://images.pexels.com/photos/221540/pexels-photo-221540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['Gated Community', '24/7 Security'], latitude: 18.5913, longitude: 73.7423, created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' },
+        { id: '2', location: 'Wakad', city: 'Pune', area_sqft: 1500, price: 7500000, facing: 'North-East', image_urls: ['https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['Park', 'Clubhouse'], latitude: 18.6083, longitude: 73.7634, created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), is_verified: false, listing_type: 'For Sale' },
+        { id: '3', location: 'Kharadi', city: 'Pune', area_sqft: 3000, price: 15000000, facing: 'West', image_urls: ['https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'NA Plot', amenities: ['Water Connection'], latitude: 18.5517, longitude: 73.9362, created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' },
+        { id: '4', location: 'Andheri West', city: 'Mumbai', area_sqft: 1200, price: 50000000, facing: 'East', image_urls: ['https://images.pexels.com/photos/210617/pexels-photo-210617.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['Gated Community'], latitude: 19.1365, longitude: 72.8275, created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), is_verified: false, listing_type: 'For Sale' },
+        { id: '5', location: 'Panvel', city: 'Mumbai', area_sqft: 5000, price: 25000000, facing: 'North', image_urls: ['https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'NA Plot', amenities: ['Road Touch'], latitude: 18.9894, longitude: 73.1175, created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' },
+        { id: '6', location: 'DLF Phase 5', city: 'Delhi NCR', area_sqft: 4500, price: 150000000, facing: 'North-East', image_urls: ['https://images.pexels.com/photos/313960/pexels-photo-313960.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], status: 'Available', property_type: 'Residential Plot', amenities: ['24/7 Security'], latitude: 28.4595, longitude: 77.0266, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), is_verified: true, listing_type: 'For Sale' }
     ];
 
     const state = {
         plots: [],
         currentUser: null,
-        cities: ['Pune', 'Mumbai', 'Bengaluru', 'Delhi NCR'],
-        activeCity: 'Pune',
         activePropertyType: 'Plots',
         activeListingType: 'Buy',
         selectedPlotIds: new Set(),
@@ -828,7 +851,7 @@
     const dom = {
         header: document.querySelector('header'),
         plotGrid: document.getElementById('plot-grid'),
-        cityFilter: document.getElementById('city-filter'),
+        citySearchForm: document.getElementById('city-search-form'),
         searchTabs: document.getElementById('search-tabs'),
         compareBtn: document.getElementById('compare-btn'),
         summarizeBtn: document.getElementById('summarize-btn'),
@@ -865,10 +888,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         loadGoogleMaps();
-        renderCategories(); // This can stay client-side for now
-        renderCityFilters();
+        renderCategories();
         handleAuthStateChange();
-        fetchPlotsByCity(state.activeCity);
+        fetchPlots();
         updateActiveNavLinks();
         updateAdRibbon();
         initScrollAnimations();
@@ -883,7 +905,7 @@
         dom.modal.closeBtn.addEventListener('click', closeModal);
         dom.modal.wrapper.addEventListener('click', e => { if (e.target === dom.modal.wrapper) closeModal(); });
 
-        dom.cityFilter.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') fetchPlotsByCity(e.target.dataset.city); });
+        dom.citySearchForm.addEventListener('submit', performSearch);
         
         dom.searchTabs.addEventListener('click', e => {
             if (!e.target.matches('.hero-search-tab')) return;
@@ -892,24 +914,24 @@
             state.activeListingType = type;
             dom.searchTabs.querySelectorAll('.hero-search-tab').forEach(t => t.classList.remove('active'));
             e.target.classList.add('active');
-            fetchPlotsByCity(state.activeCity);
+            performSearch(new Event('submit'));
         });
 
         dom.categoryBrowser.addEventListener('click', e => {
             const card = e.target.closest('.category-card'); if (!card) return;
             const category = card.dataset.category;
              if (category === 'Land') {
-                 state.activePropertyType = 'Land';
-                 fetchPlotsByCity(state.activeCity, 'Land');
+                state.activePropertyType = 'Land';
+                fetchPlots(document.getElementById('city-search-input').value.trim(), 'Land');
              } else {
-                 state.activePropertyType = 'Plots';
-                 fetchPlotsByCity(state.activeCity, null);
+                state.activePropertyType = 'Plots';
+                 fetchPlots(document.getElementById('city-search-input').value.trim(), null);
              }
              updateActiveNavLinks();
         });
         
-        dom.plotsNavLink.addEventListener('click', e => { e.preventDefault(); state.activePropertyType = 'Plots'; updateActiveNavLinks(); fetchPlotsByCity(state.activeCity, null); });
-        dom.landNavLink.addEventListener('click', e => { e.preventDefault(); state.activePropertyType = 'Land'; updateActiveNavLinks(); fetchPlotsByCity(state.activeCity, 'Land'); });
+        dom.plotsNavLink.addEventListener('click', e => { e.preventDefault(); state.activePropertyType = 'Plots'; updateActiveNavLinks(); fetchPlots(document.getElementById('city-search-input').value.trim(), null); });
+        dom.landNavLink.addEventListener('click', e => { e.preventDefault(); state.activePropertyType = 'Land'; updateActiveNavLinks(); fetchPlots(document.getElementById('city-search-input').value.trim(), 'Land'); });
         
         dom.plotGrid.addEventListener('change', e => {
             if (!e.target.classList.contains('select-plot-checkbox')) return;
@@ -956,22 +978,28 @@
         }, { threshold: 0.1 });
         document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
     }
+
+    function performSearch(e) {
+        if(e) e.preventDefault();
+        const query = document.getElementById('city-search-input').value.trim();
+        fetchPlots(query);
+    }
     
     /**************************************/
     /***** 3) Data Fetch & Rendering *****/
     /**************************************/
 
-    async function fetchPlotsByCity(city, category = null) {
+    async function fetchPlots(query = '', category = null) {
         showGridLoader();
-        state.activeCity = city;
-        dom.browseHeading.textContent = `Featured Listings in ${city}`;
+        dom.browseHeading.textContent = query ? `Showing Results for "${query}"` : 'Featured Listings';
         state.selectedPlotIds.clear();
         updateAiActionButtons();
 
-        const params = new URLSearchParams({ city });
+        const params = new URLSearchParams();
+        if (query) params.append('q', query);
         if (state.activeListingType) params.append('listing_type', state.activeListingType);
         if (category === 'Land') params.append('category', 'Land');
-
+        
         try {
             const response = await fetch(`${API_BASE_URL}/api/plots?${params.toString()}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -979,16 +1007,22 @@
             state.plots = results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             renderPlotCards();
         } catch (error) {
-            console.warn("API fetch failed, falling back to mock data. Is the backend server running?", error);
-            // --- FALLBACK LOGIC ---
-            let results = mockPlots.filter(p => p.city === city);
+            console.warn("API fetch failed, falling back to mock data.", error);
+            let results = mockPlots;
+            if (query) {
+                const lowerQuery = query.toLowerCase();
+                results = mockPlots.filter(p => 
+                    p.city.toLowerCase().includes(lowerQuery) || 
+                    p.location.toLowerCase().includes(lowerQuery)
+                );
+            }
+            
             if (state.activeListingType === 'Buy') results = results.filter(p => p.listing_type !== 'For Rent');
             if (category === 'Land') results = results.filter(p => ['NA Plot', 'Agricultural Land'].includes(p.property_type));
+            
             state.plots = results.filter(p => p.status === 'Available').sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             renderPlotCards();
-            // --- END FALLBACK ---
         } finally {
-            updateActiveCityButton();
             initScrollAnimations();
         }
     }
@@ -1002,6 +1036,11 @@
 
         const cardTemplate = document.getElementById('plot-card-template').innerHTML;
         state.plots.forEach((plot) => {
+            // Ensure each plot has a dynamically generated vastu_score if it's missing
+            if (!plot.vastu_score) {
+                plot.vastu_score = generateVastuScore(plot.facing, plot.property_type);
+            }
+
             const timeSince = new Date() - new Date(plot.created_at);
             const isNew = timeSince < 48 * 60 * 60 * 1000;
 
@@ -1041,18 +1080,12 @@
         </div>`).join('');
     }
 
-    function renderCityFilters() {
-        dom.cityFilter.innerHTML = state.cities.map(c => `<button class="city-filter-btn px-5 py-2 rounded-full font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700" data-city="${c}">${c}</button>`).join('');
-        updateActiveCityButton();
-    }
-    
-
     /**************************************/
     /***** 4) Modals (Shell & Content) *****/
     /**************************************/
 
     function openModal(title, bodyHtml, options = {}) {
-       const { isFullScreen = false, customClass = '' } = options;
+      const { isFullScreen = false, customClass = '' } = options;
         dom.modal.title.textContent = title;
         dom.modal.body.innerHTML = bodyHtml;
         
@@ -1141,19 +1174,24 @@
 
         if (!plot) {
              try {
-                const response = await fetch(`${API_BASE_URL}/api/plots/${plotId}`);
-                if (!response.ok) throw new Error('Plot not found from API');
-                plot = await response.json();
-            } catch (error) {
-                console.error('Error fetching plot details, falling back to mock data:', error);
-                plot = mockPlots.find(p => p.id == plotId);
-            }
+                 const response = await fetch(`${API_BASE_URL}/api/plots/${plotId}`);
+                 if (!response.ok) throw new Error('Plot not found from API');
+                 plot = await response.json();
+             } catch (error) {
+                 console.error('Error fetching plot details, falling back to mock data:', error);
+                 plot = mockPlots.find(p => p.id == plotId);
+             }
         }
         
         if (!plot) {
             showFeedbackToast('Could not load plot details.', 'bg-red-500');
             closeModal();
             return;
+        }
+
+        // Dynamically generate Vastu score if missing
+        if (!plot.vastu_score) {
+            plot.vastu_score = generateVastuScore(plot.facing, plot.property_type);
         }
 
         const modalBody = dom.modal.body;
@@ -1164,27 +1202,33 @@
         modalBody.querySelector('#plot-detail-location').textContent = plot.location;
         modalBody.querySelector('#plot-detail-city').textContent = plot.city;
         modalBody.querySelector('#plot-detail-price').textContent = `₹${formatIndianCurrency(plot.price)}`;
-        modalBody.querySelector('#vastu-score').textContent = `${plot.vastu_score || 'N/A'}/100`;
+        modalBody.querySelector('#vastu-score').textContent = `${plot.vastu_score}/100`;
 
         const badgeEl = modalBody.querySelector('#plot-detail-verified-badge');
         badgeEl.innerHTML = plot.is_verified
             ? `<div class="flex items-center gap-1 bg-green-600 text-white text-sm font-bold px-3 py-1 rounded-full"><i class="ph-bold ph-check-circle"></i>Verified</div>`
             : `<div class="flex items-center gap-1 bg-slate-600 text-white text-sm font-bold px-3 py-1 rounded-full"><i class="ph-bold ph-x-circle"></i>Unverified</div>`;
-
-        const totalGrowth = (Math.pow(1.10, 5) - 1) * 100;
-        modalBody.querySelector('#plot-detail-prediction').textContent = `~ ${totalGrowth.toFixed(1)}% Increase`;
+        
+        const { growth, chartData } = generatePriceTrend(plot);
+        modalBody.querySelector('#plot-detail-prediction').textContent = `~ ${growth.toFixed(1)}% Increase`;
 
         const summaryEl = modalBody.querySelector('#ai-summary');
         summaryEl.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-400"><div class="w-4 h-4 border-2 border-slate-500 border-t-slate-300 rounded-full animate-spin"></div><span>Generating AI summary...</span></div>';
         
         const summaryData = await getAISummary(plot);
-        const summary = JSON.parse(summaryData);
-        summaryEl.textContent = summary.verdict || "AI could not generate a summary.";
+        try {
+            const summary = JSON.parse(summaryData);
+            summaryEl.textContent = summary.verdict || "AI could not generate a summary.";
+        } catch (e) {
+            console.error("Failed to parse AI summary:", e);
+            summaryEl.textContent = "Could not generate AI summary at this time.";
+        }
+
 
         renderContactSellerSection(plot);
 
         await ensureGoogleMapsReady();
-        renderPriceChart(plot.price);
+        renderPriceChart(chartData);
         const lat = plot.latitude ? parseFloat(plot.latitude) : state.selectedPosition.lat;
         const lng = plot.longitude ? parseFloat(plot.longitude) : state.selectedPosition.lng;
         initializeMapForModal('neighborhood-map', { lat, lng }, false);
@@ -1281,7 +1325,7 @@
             state.googleMapsPromise = googleMapsPromise;
 
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${state.apiKeys.google}&callback=initMap`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${state.apiKeys.google}&callback=initMap&libraries=places`;
             script.async = true;
             document.head.appendChild(script);
         } else if (!state.apiKeys.google) {
@@ -1351,28 +1395,27 @@
      }
     
     async function getAIComparison(p1, p2) {
-        const prompt = `You are a real estate AI. Compare these two plots. Respond with only a valid JSON object.
+        const prompt = `You are a real estate AI. Compare these two plots based on their attributes (price, location, area, amenities, etc.). Provide a nuanced recommendation. Respond with only a valid JSON object.
         Plot 1: ${JSON.stringify(p1)}
         Plot 2: ${JSON.stringify(p2)}
-        JSON format: { "recommendation": "Markdown formatted summary of which plot is better and why." } `;
+        JSON format: { "recommendation": "Markdown formatted summary of which plot is a better investment and why. Consider all factors provided." } `;
         return await callGeminiAPI(prompt);
     }
     
     async function getAISummary(plot) {
-        const prompt = `You are a real estate AI. Provide a summary for this plot. Respond with only a valid JSON object.
+        const prompt = `You are a real estate AI. Provide a detailed summary for this specific plot. The pros and cons should be unique to its attributes. Respond with only a valid JSON object.
         Plot: ${JSON.stringify(plot)}
-        JSON format: { "pros": ["short pro 1", "short pro 2"], "cons": ["short con 1", "short con 2"], "verdict": "A concise, one-sentence final verdict." }`;
+        JSON format: { "pros": ["A specific pro based on location, price, or amenities", "Another specific pro"], "cons": ["A specific con, e.g., 'Price per sqft is slightly above the area average'", "Another specific con"], "verdict": "A concise, one-sentence final verdict that balances the pros and cons." }`;
         return await callGeminiAPI(prompt);
     }
     
     async function getAIBestValue(plot) {
-       const plotPrice = plot.price;
-       const estimatedPrice = plotPrice * (Math.random() * 0.2 + 0.9);
+       const estimatedPrice = plot.price * (0.9 + Math.random() * 0.2); // +/- 10%
        const formattedEstimatedPrice = `₹${formatIndianCurrency(estimatedPrice)}`;
-        const prompt = `You are a real estate AI. Analyze this plot's value. Respond with only a valid JSON object.
+        const prompt = `You are a real estate AI. Analyze this plot's value based on its listing price compared to an estimated market value. Respond with only a valid JSON object.
         Plot: ${JSON.stringify(plot)}
-        Estimated Market Value is ${formattedEstimatedPrice}.
-        JSON format: { "rating": "Excellent|Good|Fair", "analysis": "Markdown formatted brief explanation for the rating." } `;
+        AI Estimated Market Value is ${formattedEstimatedPrice}.
+        JSON format: { "rating": "Excellent|Good|Fair|Overpriced", "analysis": "Markdown formatted brief explanation for the rating, comparing the listing price to the estimated value and considering the plot's features." } `;
         return await callGeminiAPI(prompt);
     }
 
@@ -1457,7 +1500,6 @@
     function updateActiveNavLinks() { dom.plotsNavLink.classList.toggle('active', state.activePropertyType === 'Plots'); dom.landNavLink.classList.toggle('active', state.activePropertyType === 'Land'); }
     function updateAiActionButtons() { const c = state.selectedPlotIds.size; dom.compareBtn.disabled = c !== 2; dom.compareBtn.innerHTML = `<i class="ph-bold ph-git-compare"></i> Compare (${c}/2)`; dom.summarizeBtn.disabled = c !== 1; dom.summarizeBtn.innerHTML = `<i class="ph-bold ph-sparkle"></i> Summarize (${c === 1 ? '1' : '0'})`; dom.bestValueBtn.disabled = c !== 1; dom.bestValueBtn.innerHTML = `<i class="ph-bold ph-tag"></i> Best Value (${c === 1 ? '1' : '0'})`; }
     function showGridLoader() { dom.plotGrid.innerHTML = `<div class="col-span-full flex items-center justify-center py-20"><div class="loader"></div></div>`; }
-    function updateActiveCityButton() { dom.cityFilter.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.city === state.activeCity)); }
     
     async function handleCompareClick() {
       const plots = Array.from(state.selectedPlotIds).map(id => state.plots.find(p => p.id == id));
@@ -1489,7 +1531,7 @@
             const parsedResponse = JSON.parse(response);
             thinking.innerHTML = `<i class="ph-bold ph-robot text-indigo-400 text-xl mr-2"></i><span>${parsedResponse.error || "Sorry, I couldn't process that."}</span>`;
         } catch (e) {
-             thinking.innerHTML = `<i class="ph-bold ph-robot text-indigo-400 text-xl mr-2"></i><span>${marked.parse(response)}</span>`;
+             thinking.innerHTML = `<i class="ph-bold ph-robot text-indigo-400 text-xl mr-2 flex-shrink-0"></i><div>${marked.parse(response)}</div>`;
         }
         
         dom.chat.box.scrollTop = dom.chat.box.scrollHeight; 
@@ -1664,26 +1706,22 @@
         if (x >= 100000) return (x / 100000).toFixed(2).replace(/\.00$/, '') + ' Lakh';
         return x.toLocaleString('en-IN');
     }
-    function renderPriceChart(currentPriceValue) {
-      const ctx = dom.modal.body.querySelector('#price-trend-chart')?.getContext('2d');
-      if (!ctx) return;
-      if (state.priceChart) state.priceChart.destroy();
-      const currentPrice = Number(currentPriceValue);
-      const years = 5;
-      const labels = Array.from({ length: years + 1 }, (_, i) => new Date().getFullYear() - years + i);
-      const data = [];
-      let price = currentPrice / Math.pow(1.08, years);
-      for (let i = 0; i <= years; i++) {
-          data.push(price);
-          price *= (1 + (Math.random() * 0.05 + 0.06));
-      }
-      data[data.length - 1] = currentPrice;
-      state.priceChart = new Chart(ctx, {
-          type: 'line',
-          data: { labels, datasets: [{ label: 'Estimated Property Value', data, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.2)', fill: true, tension: 0.4 }] },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#94a3b8', callback: value => `₹${formatIndianCurrency(value)}` }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }, x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `Value: ₹${formatIndianCurrency(context.parsed.y)}` } } } }
-      });
+
+    function renderPriceChart(chartData) {
+        const ctx = dom.modal.body.querySelector('#price-trend-chart')?.getContext('2d');
+        if (!ctx) return;
+        if (state.priceChart) state.priceChart.destroy();
+        
+        const labels = chartData.map(d => d.year);
+        const data = chartData.map(d => d.price);
+
+        state.priceChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets: [{ label: 'Estimated Property Value', data, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.2)', fill: true, tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#94a3b8', callback: value => `₹${formatIndianCurrency(value)}` }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }, x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `Value: ₹${formatIndianCurrency(context.parsed.y)}` } } } }
+        });
     }
+
     async function handleAiAction(title, getResponse, plots) {
         const loadingHtml = document.getElementById('ai-analysis-loading-template').innerHTML;
         openModal('', loadingHtml, { isFullScreen: true });
@@ -1741,8 +1779,9 @@
             else if (data.rating === 'Good') ratingEl.classList.add('text-yellow-400');
             else ratingEl.classList.add('text-orange-400');
 
+            const estimatedPrice = plot.price * (0.9 + Math.random() * 0.2);
             dom.modal.body.querySelector('#best-value-listing-price').textContent = `₹${formatIndianCurrency(plot.price)}`;
-            dom.modal.body.querySelector('#best-value-estimated-price').textContent = plot.price > 0 ? `~₹${formatIndianCurrency(plot.price * (Math.random() * 0.2 + 0.9))}` : "N/A";
+            dom.modal.body.querySelector('#best-value-estimated-price').textContent = `~₹${formatIndianCurrency(estimatedPrice)}`;
             dom.modal.body.querySelector('#best-value-analysis').innerHTML = marked.parse(data.analysis);
             
         } else if(title === 'AI Comparison'){
@@ -1765,14 +1804,18 @@
             dom.modal.body.querySelector('#ai-recommendation').innerHTML = marked.parse(data.recommendation);
         } else {
              const backButton = `<button onclick="closeModal()" class="fixed top-6 left-8 text-white bg-black/30 backdrop-blur-sm hover:bg-black/50 p-3 rounded-full z-50 transition-colors"><i class="ph-bold ph-arrow-left text-2xl"></i></button>`;
-             dom.modal.body.innerHTML = `${backButton}<div class="p-4 sm:p-8 md:p-12 prose prose-invert max-w-none">${marked.parse(data)}</div>`;
+              dom.modal.body.innerHTML = `${backButton}<div class="p-4 sm:p-8 md:p-12 prose prose-invert max-w-none">${marked.parse(data)}</div>`;
         }
     }
     
     function initAddPlotFormListeners() {
         const form = dom.modal.body.querySelector('#add-plot-form');
         if (!form) return;
-         dom.modal.body.addEventListener('click', (e) => {
+        
+        let uploadedImages = []; // Array to store File objects for step 3
+
+        // Step navigation
+        dom.modal.body.addEventListener('click', (e) => {
             if (e.target.matches('.next-btn, .prev-btn')) {
                 const currentStepEl = e.target.closest('.form-step');
                 const targetStep = e.target.dataset.next || e.target.dataset.prev;
@@ -1782,15 +1825,111 @@
                     targetStepEl.classList.remove('hidden');
                     updateStepIndicator(targetStep);
                     if (targetStep === '2') {
-                        
                         ensureGoogleMapsReady().then(() => {
-                           initializeMapForModal('map', state.selectedPosition, true);
+                            initializeMapForModal('map', state.selectedPosition, true);
                         });
                     }
                 }
             }
         });
 
+        // Step 3: Image Upload Logic
+        const imageDropArea = form.querySelector('#image-drop-area');
+        const imageInput = form.querySelector('#image-input');
+        const imagePreviewArea = form.querySelector('#image-preview-area');
+
+        if(imageDropArea) {
+            imageDropArea.addEventListener('click', () => imageInput.click());
+            imageDropArea.addEventListener('dragover', e => { e.preventDefault(); imageDropArea.classList.add('dragover'); });
+            imageDropArea.addEventListener('dragleave', () => imageDropArea.classList.remove('dragover'));
+            imageDropArea.addEventListener('drop', e => {
+                e.preventDefault();
+                imageDropArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    imageInput.files = files; 
+                    handleImageFiles(files);
+                }
+            });
+            imageInput.addEventListener('change', () => handleImageFiles(imageInput.files));
+        }
+
+        function handleImageFiles(files) {
+            const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            const totalFiles = uploadedImages.length + newFiles.length;
+
+            if (totalFiles > 5) {
+                showFeedbackToast('You can upload a maximum of 5 images.', 'bg-red-500');
+                return;
+            }
+
+            uploadedImages.push(...newFiles.slice(0, 5 - uploadedImages.length));
+            renderImagePreviews();
+        }
+
+        function renderImagePreviews() {
+            imagePreviewArea.innerHTML = '';
+            uploadedImages.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const previewContainer = document.createElement('div');
+                    previewContainer.className = 'relative group animate-on-scroll in-view';
+                    previewContainer.innerHTML = `
+                        <div class="preview-image-container">
+                            <img src="${e.target.result}" class="preview-image">
+                        </div>
+                        <button type="button" data-index="${index}" class="remove-img-btn absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity z-10">&times;</button>
+                    `;
+                    imagePreviewArea.appendChild(previewContainer);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        if(imagePreviewArea) {
+            imagePreviewArea.addEventListener('click', e => {
+                const removeBtn = e.target.closest('.remove-img-btn');
+                if (removeBtn) {
+                    const indexToRemove = parseInt(removeBtn.dataset.index, 10);
+                    uploadedImages.splice(indexToRemove, 1);
+                    renderImagePreviews();
+                }
+            });
+        }
+
+        // Step 4: Document Upload Logic
+        function setupDocDropArea(areaId, inputId, nameElId) {
+            const dropArea = form.querySelector(`#${areaId}`);
+            const fileInput = form.querySelector(`#${inputId}`);
+            const fileNameEl = form.querySelector(`#${nameElId}`);
+
+            if (!dropArea || !fileInput || !fileNameEl) return;
+
+            dropArea.addEventListener('click', () => fileInput.click());
+            dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('dragover'); });
+            dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+            dropArea.addEventListener('drop', e => {
+                e.preventDefault();
+                dropArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    fileInput.files = files;
+                    fileNameEl.textContent = files[0].name;
+                    fileNameEl.classList.add('text-green-400');
+                }
+            });
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    fileNameEl.textContent = fileInput.files[0].name;
+                    fileNameEl.classList.add('text-green-400');
+                }
+            });
+        }
+
+        setupDocDropArea('aadhaar-drop-area', 'aadhaar-input', 'aadhaar-file-name');
+        setupDocDropArea('sev-twelve-drop-area', 'sev-twelve-input', 'sev-twelve-file-name');
+
+        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = form.querySelector('button[type="submit"]');
@@ -1800,83 +1939,9 @@
             submitBtn.disabled = true;
             submitText.textContent = 'Submitting...';
             submitLoader.classList.remove('hidden');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            data.city = state.activeCity; // Add active city to the form data
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/plots`, {
@@ -1889,7 +1954,7 @@
                 
                 showFeedbackToast('Plot submitted successfully!', 'bg-green-600');
                 closeModal();
-                fetchPlotsByCity(state.activeCity); // Refresh the list
+                fetchPlots();
             } catch (error) {
                 console.warn("API submission failed, adding plot to client-side mock data instead.", error);
                 const newPlot = {
@@ -1897,8 +1962,11 @@
                     id: `mock_${Date.now()}`,
                     created_at: new Date().toISOString(),
                     is_verified: false,
-                    image_urls: ['https://placehold.co/600x400/1e293b/e2e8f0?text=New+Plot'],
-                    price: parseINR(data.price)
+                    image_urls: uploadedImages.length > 0 ? [URL.createObjectURL(uploadedImages[0])] : ['https://placehold.co/600x400/1e293b/e2e8f0?text=New+Plot'],
+                    price: parseINR(data.price),
+                    latitude: state.selectedPosition.lat,
+                    longitude: state.selectedPosition.lng,
+                    vastu_score: generateVastuScore(data.facing, data.property_type)
                 };
                 mockPlots.unshift(newPlot);
                 state.plots.unshift(newPlot);
@@ -1933,6 +2001,36 @@
 
         if (isDraggable) {
             marker.addListener('dragend', () => {
+                const newPos = marker.getPosition();
+                state.selectedPosition = { lat: newPos.lat(), lng: newPos.lng() };
+            });
+        }
+        
+        // Location Search Autocomplete Logic
+        const searchInput = dom.modal.body.querySelector('#location-search-input');
+        if (searchInput && google.maps.places) {
+            const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+                fields: ["geometry", "name"],
+                types: ["geocode"]
+            });
+            
+            autocomplete.bindTo("bounds", map);
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    showFeedbackToast(`No details available for input: '${place.name}'`, 'bg-orange-500');
+                    return;
+                }
+
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(17);
+                }
+
+                marker.setPosition(place.geometry.location);
                 const newPos = marker.getPosition();
                 state.selectedPosition = { lat: newPos.lat(), lng: newPos.lng() };
             });
@@ -1986,21 +2084,74 @@
         if (dom.modal.body.contains(document.getElementById('chat-context'))) {
             dom.chat.context = document.getElementById('chat-context');
              if (state.contextPlot) {
-                dom.chat.context.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span>Focusing on: <strong>${state.contextPlot.location}</strong></span>
-                        <button id="clear-context-btn" class="text-xs hover:text-white">&times; Clear</button>
-                    </div>
-                `;
-                dom.chat.context.classList.remove('hidden');
-                document.getElementById('clear-context-btn').addEventListener('click', clearChatContext);
-            } else {
-                dom.chat.context.classList.add('hidden');
-                dom.chat.context.innerHTML = '';
-            }
-            updateChatStarters();
+                 dom.chat.context.innerHTML = `
+                     <div class="flex items-center justify-between">
+                         <span>Focusing on: <strong>${state.contextPlot.location}</strong></span>
+                         <button id="clear-context-btn" class="text-xs hover:text-white">&times; Clear</button>
+                     </div>
+                 `;
+                 dom.chat.context.classList.remove('hidden');
+                 document.getElementById('clear-context-btn').addEventListener('click', clearChatContext);
+             } else {
+                 dom.chat.context.classList.add('hidden');
+                 dom.chat.context.innerHTML = '';
+             }
+             updateChatStarters();
         }
     }
+    
+    // NEW DYNAMIC AI HELPER FUNCTIONS
+    function generateVastuScore(facing, propertyType) {
+        let baseScore = 60;
+        const facingLower = (facing || '').toLowerCase();
+        
+        if (facingLower.includes('north-east') || facingLower.includes('east')) {
+            baseScore += 25;
+        } else if (facingLower.includes('north')) {
+            baseScore += 15;
+        } else if (facingLower.includes('west')) {
+            baseScore += 5;
+        }
+
+        if (propertyType === 'Residential') {
+            baseScore += 5;
+        }
+
+        // Add random variance
+        return Math.min(99, Math.floor(baseScore + (Math.random() * 10 - 5)));
+    }
+
+    function generatePriceTrend(plot) {
+        const years = 5;
+        const currentPrice = Number(plot.price);
+        // Base growth rate on city and property type
+        let baseAnnualGrowth = 0.08; // 8% default
+        if (plot.city === 'Mumbai' || plot.city === 'Delhi NCR') baseAnnualGrowth = 0.11; // 11% for metro
+        if (plot.property_type === 'Commercial') baseAnnualGrowth += 0.02;
+
+        const chartData = [];
+        let price = currentPrice;
+        
+        // Calculate historical data
+        const historicalData = [];
+        let pastPrice = currentPrice;
+        for (let i = 0; i <= years; i++) {
+             historicalData.unshift({
+                year: new Date().getFullYear() - i,
+                price: pastPrice
+            });
+            // De-compound with volatility
+            const randomFactor = 1 + (Math.random() * 0.06 - 0.03); // +/- 3% volatility
+            pastPrice /= (baseAnnualGrowth * randomFactor + 1);
+        }
+        
+        chartData.push(...historicalData);
+        
+        const totalGrowth = ((currentPrice / chartData[0].price) - 1) * 100;
+
+        return { growth: totalGrowth, chartData };
+    }
+
 
   </script>
 </body>
